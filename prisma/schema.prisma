@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserProfileType {
+  ADMIN
+  CLIENT_REGULAR
+  CLIENT_SUBSCRIBER
+  @@map("user_profile_type")
+}
+
+model User {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  email       String   @unique
+  password    String   
+  avatar      String? 
+  profile     UserProfileType @default(CLIENT_REGULAR)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  geekItems   GeekItem[]
+  categories  Category[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String @id @default(uuid()) @db.Uuid
+  name        String
+  icon        String
+  order       Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  user_id     String? @db.Uuid
+  user        User? @relation(fields: [user_id], references: [id])
+  geekItems   GeekItem[]
+}
+
+model GeekItem {
+  id          String @id @default(uuid()) @db.Uuid
+  title       String
+  comment     String?
+  rating      Int
+  dateAdd     DateTime?
+  photo       String?
+  user_id     String    @db.Uuid
+  category_id String    @db.Uuid
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  user        User @relation(fields: [user_id], references: [id])
+  category    Category @relation(fields: [category_id], references: [id])
+}
+
